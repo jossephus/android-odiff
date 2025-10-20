@@ -6,8 +6,8 @@ Android Odiff is an android image diffing library based on the fast image compar
 </br>
 
 <p align="center">
-    <img src="./assets/image-1.jpg" width="280"/>
-    <img src="./assets/image-2.jpg" width="280"/>
+  <img src="./assets/image-1.jpg" width="280" style="margin-right: 40px;"/>
+  <img src="./assets/image-2.jpg" width="280"/>
 </p>
 
 ## Android Odiff in Android Project
