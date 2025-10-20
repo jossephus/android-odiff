@@ -255,7 +255,7 @@ fun MainScreen(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text("Compute Difference")
+            Text("Diff Image")
         }
     }
 }

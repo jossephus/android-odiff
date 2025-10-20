@@ -27,6 +27,10 @@ fun DiffScreen(diffImagePath: String?) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text(
+                "Image Diff",
+                style = MaterialTheme.typography.headlineLarge
+            )
             Spacer(modifier = Modifier.height(16.dp))
 
             Spacer(modifier = Modifier.height(24.dp))
