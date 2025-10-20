@@ -1,0 +1,23 @@
+{
+  "name": "odiff",
+  "version": "4.1.1",
+  "author": "odiff contributors",
+  "license": "MIT",
+  "description": "The fastest image difference tool in the world (Zig port of odiff)",
+  "scripts": {
+    "test": "ava",
+    "update-readme" : "node scripts/process-readme.js"
+
+  },
+  "keywords": [
+    "visual-regression",
+    "pixelmatch",
+    "image",
+    "comparison",
+    "diff",
+    "zig"
+  ],
+  "devDependencies": {
+    "ava": "^6.1.3"
+  }
+}

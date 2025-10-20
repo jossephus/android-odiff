@@ -1,0 +1,19 @@
+.{
+    .name = .odiff,
+    .version = "4.1.1",
+    .fingerprint = 0xb9748f3661c8366c,
+    .minimum_zig_version = "0.15.1",
+    .dependencies = .{
+        .imgz = .{
+            .path = "./vendor/imgz",
+        },
+    },
+
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "LICENSE",
+        "README.md",
+    },
+}

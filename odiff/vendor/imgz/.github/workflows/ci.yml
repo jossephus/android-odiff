@@ -1,0 +1,152 @@
+name: Build and Test
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - "v*.*.*"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.15.1
+
+      - name: Install nasm (Linux)
+        uses: ilammy/setup-nasm@v1
+
+      - name: Build Libraries
+        run: |
+          zig build ci -Doptimize=ReleaseFast --summary all --verbose
+
+      - name: Upload aarch64-linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: aarch64-linux
+          path: zig-out/aarch64-linux/
+          retention-days: 14
+
+      - name: Upload aarch64-macos
+        uses: actions/upload-artifact@v4
+        with:
+          name: aarch64-macos
+          path: zig-out/aarch64-macos/
+          retention-days: 14
+
+      - name: Upload aarch64-windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: aarch64-windows
+          path: zig-out/aarch64-windows/
+          retention-days: 14
+
+      - name: Upload riscv32-linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: riscv32-linux
+          path: zig-out/riscv32-linux/
+          retention-days: 14
+
+      - name: Upload riscv64-linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: riscv64-linux
+          path: zig-out/riscv64-linux/
+          retention-days: 14
+
+      - name: Upload x86_64-linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: x86_64-linux
+          path: zig-out/x86_64-linux/
+          retention-days: 14
+
+      - name: Upload x86_64-macos
+        uses: actions/upload-artifact@v4
+        with:
+          name: x86_64-macos
+          path: zig-out/x86_64-macos/
+          retention-days: 14
+
+      - name: Upload x86_64-windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: x86_64-windows
+          path: zig-out/x86_64-windows/
+          retention-days: 14
+
+  test:
+    name: Run Tests (all configs on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            arch: x86_64
+            target: x86_64-linux
+          - os: windows-latest
+            arch: x86_64
+            target: x86_64-windows
+          - os: macos-latest
+            arch: aarch64
+            target: aarch64-macos
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Zig
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.15.1
+
+      - name: Install nasm
+        if: ${{ matrix.arch == 'x86_64' }}
+        uses: ilammy/setup-nasm@v1
+
+      - name: Run tests (All enabled)
+        run: |
+          zig build test -Dtarget=${{ matrix.target }} --summary all --verbose
+
+      - name: Run C tests
+        run: |
+          zig build -Doptimize=ReleaseFast --summary all --verbose
+          make test
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: [build]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: false
+
+      - name: Create Release Archives Per Platform
+        run: |
+          mkdir -p ./output
+          for d in ./*; do
+            [[ "$d" == "./output" ]] && continue
+            cd "$d" && zip -r "../output/$d.zip" . && cd ..
+          done
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          files: |
+            ./output/*
