@@ -1,7 +1,7 @@
 <h1 align="center">Android Odiff</h1></br>
 
 <p align="center">
-Android Odiff is an android image diffing library based on the fast image comparision library 
+Android Odiff is an android image diffing library based on the fast image comparision library [odiff](https://github.com/dmtrKovalenko/odiff)
 </p>
 </br>
 
