@@ -48,6 +48,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil3.compose.rememberAsyncImagePainter
+import com.jossephus.android_diff.CDiffOptions
+import com.jossephus.android_diff.ODiffLib
 import com.jossephus.sample_android_odiff.ui.theme.TestOdiff_2Theme
 
 class MainActivity : ComponentActivity() {

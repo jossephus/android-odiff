@@ -29,6 +29,6 @@ add_library(tiff STATIC IMPORTED)
 set_target_properties(tiff PROPERTIES IMPORTED_LOCATION
         ${CMAKE_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI}/libtiff.a)
 
-add_library(odiff_lib SHARED ./odiff_bindings.cpp)
+add_library(odiff_lib SHARED c_src/odiff_bindings.cpp)
 target_link_options(odiff_lib PRIVATE -flto "-Wl,-z,max-page-size=16384" "-Wl,-z,common-page-size=16384")
 target_link_libraries(odiff_lib odiff spng jpeg z zstd tiff webp atomic m -pthread -Wl,--allow-shlib-undefined)

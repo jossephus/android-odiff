@@ -88,8 +88,7 @@ static std::string jstringToString(JNIEnv *env, jstring jstr) {
 //
 //// JNI: odiff_diff(base, comp, diffOut, options)
 JNIEXPORT jint JNICALL
-Java_com_jossephus_sample_1android_1odiff_ODiffLib_odiff_1diff
-
+Java_com_jossephus_android_1diff_ODiffLib_odiff_1diff
         (JNIEnv *env, jobject /*thiz*/,
          jstring jbase, jstring jcomp, jstring jdiffOut,
          jobject joptions) {

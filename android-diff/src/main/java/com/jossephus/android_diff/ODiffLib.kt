@@ -1,4 +1,4 @@
-package com.jossephus.sample_android_odiff
+package com.jossephus.android_diff
 
 data class CDiffOptions(
     var antialiasing: Int = 0,
@@ -10,7 +10,7 @@ data class CDiffOptions(
     var failOnLayoutChange: Int = 0,
     var enableAsm: Int = 0,
     var ignoreRegionCount: Long = 0,
-    var ignoreRegions: Long = 0 // native pointer
+    var ignoreRegions: Long = 0
 )
 
 data class CDiffResult(
@@ -18,7 +18,7 @@ data class CDiffResult(
     var diffCount: Int = 0,
     var diffPercentage: Double = 0.0,
     var diffLineCount: Long = 0,
-    var diffLines: Long = 0, // native pointer
+    var diffLines: Long = 0,
     var diffOutputPath: String? = null
 )
 
