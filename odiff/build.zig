@@ -26,10 +26,6 @@ pub fn build(b: *std.Build) !void {
 
     for (build_targets) |target_query| {
         const target = b.resolveTargetQuery(target_query);
-        const imgz = b.dependency("imgz", .{
-            .target = target,
-            .optimize = optimize,
-        });
         const abi_output_dir = getOutputDir(target.result) catch |err| {
             std.log.err("Unsupported target architecture: {}", .{target.result.cpu.arch});
             return err;
@@ -38,23 +34,18 @@ pub fn build(b: *std.Build) !void {
         const header_output_dir = try std.fs.path.join(b.allocator, &.{ abi_output_dir, "include" });
         const build_options_mod = build_options.createModule();
 
-        const lib_mod, const exe = buildOdiff(b, target, optimize, dynamic, build_options_mod);
-        _ = exe;
+        const android_triple = try getAndroidTriple(target.result);
+        const libc_config = createLibC(b, android_triple, android_api_version, ndk_path, ndk_version);
 
-        // Build and install the library
+        const lib_mod, _ = buildOdiff(b, target, optimize, dynamic, build_options_mod, libc_config);
         const root_lib = b.addLibrary(.{
             .name = "odiff",
             .root_module = lib_mod,
-            .linkage = if (dynamic) .dynamic else .static,
+            .linkage = .static,
         });
+        root_lib.setLibCFile(libc_config);
 
         root_lib.linkLibC();
-
-        const android_triple = getAndroidTriple(root_lib.rootModuleTarget()) catch |err| @panic(@errorName(err));
-
-        const libc_config = createLibC(b, android_triple, android_api_version, ndk_path, ndk_version);
-
-        root_lib.setLibCFile(libc_config);
 
         b.installArtifact(root_lib);
 
@@ -70,13 +61,6 @@ pub fn build(b: *std.Build) !void {
                 },
             },
         });
-
-        addInstallArtifact(b, imgz.artifact("z"), b.getInstallStep(), header_output_dir, abi_output_dir);
-        addInstallArtifact(b, imgz.artifact("zstd"), b.getInstallStep(), header_output_dir, abi_output_dir);
-        addInstallArtifact(b, imgz.artifact("spng"), b.getInstallStep(), header_output_dir, abi_output_dir);
-        addInstallArtifact(b, imgz.artifact("jpeg-turbo"), b.getInstallStep(), header_output_dir, abi_output_dir);
-        addInstallArtifact(b, imgz.artifact("webp"), b.getInstallStep(), header_output_dir, abi_output_dir);
-        addInstallArtifact(b, imgz.artifact("tiff"), b.getInstallStep(), header_output_dir, abi_output_dir);
 
         b.getInstallStep().dependOn(&install_artifact.step);
     }
@@ -105,6 +89,7 @@ fn buildOdiff(
     optimize: std.builtin.OptimizeMode,
     dynamic: bool,
     build_options_mod: *std.Build.Module,
+    libc_config: std.Build.LazyPath,
 ) struct { *std.Build.Module, *std.Build.Step.Compile } {
     const lib_mod = b.createModule(.{
         .root_source_file = b.path("src/root.zig"),
@@ -112,7 +97,7 @@ fn buildOdiff(
         .optimize = optimize,
         .link_libc = true,
     });
-    linkDeps(b, target, optimize, dynamic, lib_mod);
+    linkDeps(b, target, optimize, dynamic, lib_mod, libc_config);
 
     var c_flags = std.array_list.Managed([]const u8).init(b.allocator);
     defer c_flags.deinit();
@@ -168,7 +153,7 @@ fn buildOdiff(
     return .{ lib_mod, exe };
 }
 
-pub fn linkDeps(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, dynamic: bool, module: *std.Build.Module) void {
+pub fn linkDeps(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.builtin.OptimizeMode, dynamic: bool, module: *std.Build.Module, libc_config: std.Build.LazyPath) void {
     const host_target = b.graph.host.result;
     const build_target = target.result;
     const is_cross_compiling = host_target.cpu.arch != build_target.cpu.arch or
@@ -177,7 +162,7 @@ pub fn linkDeps(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.b
         switch (build_target.os.tag) {
             .windows => {
                 std.log.warn("Dynamic linking is not supported on Windows, falling back to static linking", .{});
-                return linkDeps(b, target, optimize, false, module);
+                return linkDeps(b, target, optimize, false, module, libc_config);
             },
             else => {
                 module.linkSystemLibrary("spng", .{});
@@ -189,10 +174,13 @@ pub fn linkDeps(b: *std.Build, target: std.Build.ResolvedTarget, optimize: std.b
         Imgz.addToModule(b, module, .{
             .target = target,
             .optimize = optimize,
-            .jpeg_turbo = .{ .simd = false },
+            .jpeg_turbo = .{
+                .simd = target.result.cpu.arch != .arm,
+            },
             .spng = .{},
             .tiff = .{},
             .webp = .{},
+            .libc_file = libc_config,
         }) catch @panic("Failed to link required dependencies, please create an issue on the repo :)");
     }
 }

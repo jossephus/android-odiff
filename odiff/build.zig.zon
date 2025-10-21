@@ -5,7 +5,8 @@
     .minimum_zig_version = "0.15.1",
     .dependencies = .{
         .imgz = .{
-            .path = "./vendor/imgz",
+            .url = "git+https://github.com/shreyassanthu77/imgz.git?ref=custom-libc#14f7b7e1c234fcff7ea044a561999df3ca75b01d",
+            .hash = "imgz-0.2.0-BqHzkEtuCwDMZt6Bz-_hHFAF8625FY10LQGL4J2o49E0",
         },
     },
 
