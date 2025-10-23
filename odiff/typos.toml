@@ -1,6 +1,0 @@
-[default.extend-words]
-"ba" = "ba"
-"odiff" = "odiff"
-
-[files]
-extend-exclude = ["build.zig.zon"]

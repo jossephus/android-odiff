@@ -1,0 +1,18 @@
+.{
+    .name = .odiff_android_lib,
+    .version = "0.0.0",
+    .fingerprint = 0x7b4b77cc05107eb1,
+    .minimum_zig_version = "0.15.1",
+    .dependencies = .{
+        .url = "git+https://github.com/shreyassanthu77/odiff?ref=refactor-tests#1f53db8c9b882ba84dd9750e0908df4a99476a5d",
+        .hash = "odiff-4.1.1-bDbIYd0cAgB8D9q44E3OtsAnzXSWNkp1SxTYdF2vask9",
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        // For example...
+        //"LICENSE",
+        //"README.md",
+    },
+}
